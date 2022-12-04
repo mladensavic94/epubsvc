@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -60,7 +59,6 @@ func uploadHandler(s *Storage) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		//async coversion
 		u := uuid.New()
 		go convertAsync(u, epub, s)
 		s.Set(u, epub, false)
@@ -73,12 +71,16 @@ func convertAsync(u uuid.UUID, epub string, s *Storage) {
 	if err != nil {
 		Logger.Error(err.Error())
 	}
-	Convert(epub, root)
+	path, err := Convert(epub, root)
+	if err != nil {
+		Logger.Error(err.Error())
+	}
 	err = DelArchive(root)
 	if err != nil {
 		Logger.Error(err.Error())
 	}
-	s.Set(u, strings.Replace(epub, "epub", "pdf", -1), true)
+	s.Set(u, path, true)
+	Logger.Info("File generated", zap.String("path", epub))
 }
 
 func storeTempFile(r *http.Request) (string, error) {

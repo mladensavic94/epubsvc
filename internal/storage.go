@@ -9,13 +9,11 @@ import (
 
 type Storage struct {
 	cache map[uuid.UUID]FileWrap
-	path  map[string]uuid.UUID
 }
 
 func NewStorage() *Storage {
 	return &Storage{
 		cache: make(map[uuid.UUID]FileWrap),
-		path:  make(map[string]uuid.UUID),
 	}
 }
 
